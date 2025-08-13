@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App para Estudiar Inglés</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Vista Principal: Menú de Categorías -->
+        <header id="main-header">
+            <h1>Elige una Categoría</h1>
+            <div class="header-extras">
+                <button id="theme-toggle-btn" class="extra-btn" title="Cambiar tema">🌙</button>
+                <button id="quick-review-btn" class="extra-btn">Repaso Rápido</button>
+                <button id="random-mode-btn" class="extra-btn">Modo Aleatorio Global</button>
+            </div>
+        </header>
+        <main id="main-menu" class="view active">
+            <!-- Las categorías se generarán aquí -->
+        </main>
+
+        <!-- Vista de Módulos por Categoría -->
+        <section id="module-menu" class="view">
+            <button class="back-btn" onclick="showView('main-menu')">← Volver a Categorías</button>
+            <h2 id="category-title"></h2>
+            <div class="progress-bar-container">
+                <div id="category-progress-bar"></div>
+            </div>
+            <div id="module-list">
+                <!-- Los módulos se generarán aquí -->
+            </div>
+        </section>
+
+        <!-- Vista de Aprendizaje del Módulo -->
+        <section id="module-view" class="view">
+            <button class="back-btn" id="back-to-modules-btn">← Volver a Módulos</button>
+            <h2 id="module-title"></h2>
+            <div id="module-content">
+                <!-- El contenido del módulo (aprender, ejercicios) se generará aquí -->
+            </div>
+        </section>
+
+        <!-- Modal para Tests -->
+        <div id="test-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2 id="test-title"></h2>
+                <div id="test-question-container"></div>
+                <div id="test-controls">
+                    <button id="test-submit-btn">Evaluar</button>
+                </div>
+                <div id="test-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
