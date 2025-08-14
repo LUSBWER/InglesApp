@@ -407,26 +407,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return shuffleArray(learnedWords).filter((v,i,a)=>a.findIndex(t=>(t.en === v.en))===i);
     }
 
-    function speak(text) {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
-            // Comprueba si las voces están cargadas y si no, da un aviso.
-            const voices = window.speechSynthesis.getVoices();
-            if (voices.length === 0) {
-                alert('No se encontraron voces de síntesis de voz en tu navegador. Esto puede ser una configuración de tu navegador (como los Escudos de Brave) o del sistema operativo. Intenta recargar la página o revisar la configuración del sitio.');
-                // En algunos navegadores, las voces se cargan de forma asíncrona.
-                window.speechSynthesis.onvoiceschanged = () => {
-                    const voices = window.speechSynthesis.getVoices();
-                    utterance.voice = voices.find(voice => voice.lang === 'en-US');
-                    window.speechSynthesis.speak(utterance);
-                };
-                return;
-            }
-            utterance.voice = voices.find(voice => voice.lang === 'en-US');
-            window.speechSynthesis.speak(utterance);
+    // LÓGICA DE VOZ CON RESPONSIVEVOICE.JS
+    window.speak = function(text) {
+        // Comprueba si responsiveVoice está cargado y listo
+        console.log("Intentando reproducir con ResponsiveVoice.js...");
+        if (typeof responsiveVoice !== 'undefined' && responsiveVoice.speak) {
+            console.log("ResponsiveVoice.js está cargado. Reproduciendo...");
+            responsiveVoice.speak(text, "US English Female", {rate: 0.9});
         } else {
-            alert('Tu navegador no soporta la síntesis de voz.');
+            console.error("ResponsiveVoice.js no está cargado o no está disponible.");
+            alert("El servicio de voz no está disponible. Por favor, comprueba tu conexión a internet y recarga la página.");
         }
     }
 
