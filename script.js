@@ -193,23 +193,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const categoryData = vocabulary[category];
         if (!userProgress[category]) userProgress[category] = {};
         const progress = userProgress[category];
-        let unlocked = true;
+        // let unlocked = true; // Eliminamos el control de bloqueo
 
         for (const moduleNum in categoryData.modules) {
             const card = document.createElement('div');
             card.className = 'module-card';
             const isCompleted = progress[moduleNum] && progress[moduleNum].completed;
 
-            if (unlocked) {
-                card.classList.add('unlocked');
-                card.innerHTML = `<div>Módulo ${moduleNum}</div><div class="status">${isCompleted ? '✅' : '▶️'}</div>`;
-                card.onclick = () => selectModule(category, moduleNum);
-            } else {
-                card.classList.add('locked');
-                card.innerHTML = `<div>Módulo ${moduleNum}</div><div class="status">🔒</div>`;
-            }
+            // Siempre desbloqueado
+            card.classList.add('unlocked');
+            card.innerHTML = `<div>Módulo ${moduleNum}</div><div class="status">${isCompleted ? '✅' : '▶️'}</div>`;
+            card.onclick = () => selectModule(category, moduleNum);
+            
             moduleList.appendChild(card);
-            unlocked = isCompleted;
+            // unlocked = isCompleted; // Ya no es necesario
         }
         updateProgressBar(category);
     }
