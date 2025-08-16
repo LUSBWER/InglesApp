@@ -17,6 +17,7 @@
             <h1>Elige una Categoría</h1>
             <div class="header-extras">
                 <button id="theme-toggle-btn" class="extra-btn" title="Cambiar tema">🌙</button>
+                <button id="explorer-btn" class="extra-btn" title="Explorador de Vocabulario">🔍</button> <!-- Botón Añadido -->
                 <button id="quick-review-btn" class="extra-btn">Repaso Rápido</button>
                 <button id="random-mode-btn" class="extra-btn">Modo Aleatorio Global</button>
             </div>
@@ -44,6 +45,30 @@
             <div id="module-content">
                 <!-- El contenido del módulo (aprender, ejercicios) se generará aquí -->
             </div>
+        </section>
+
+        <!-- NUEVA VISTA: Explorador de Vocabulario -->
+        <section id="vocabulary-explorer-view" class="view">
+            <button class="back-btn" onclick="showView('main-menu')">← Volver al Menú</button>
+            <h2>Explorador de Vocabulario</h2>
+            <div class="card p-4 mb-4">
+                <h3 class="mb-3">Paso 1: Expansión de la Palabra Raíz</h3>
+                <div class="input-group mb-3">
+                    <input type="text" id="word-input" class="form-control" placeholder="Escribe una palabra en inglés (ej: run, happy)">
+                    <button id="search-word-btn" class="btn btn-primary">Buscar</button>
+                </div>
+                <div id="word-expansion-results" class="mt-3"></div>
+            </div>
+            <div id="step-2-3-container" class="card p-4 mb-4 d-none">
+                <h3 class="mb-3">Pasos 2 & 3: Crea Contexto y Explica</h3>
+                <div id="context-creation-area"></div>
+                <button id="save-card-btn" class="btn btn-success mt-3">Guardar Tarjeta de Repaso</button>
+            </div>
+            <div class="text-center mb-4">
+                 <h3 class="mb-3">Paso 4: Repaso Micro-Inmersivo</h3>
+                 <button id="review-cards-btn" class="btn btn-info">Ver mis tarjetas guardadas</button>
+            </div>
+            <div id="review-area" class="d-none"></div>
         </section>
 
         <!-- Modal para Tests -->
