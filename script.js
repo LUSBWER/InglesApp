@@ -479,4 +479,203 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     init();
+
+    // --- START: VOCABULARY EXPLORER ADDITION ---
+
+    // --- DOM Elements for Explorer ---
+    const explorerBtn = document.getElementById('explorer-btn');
+    const wordInput = document.getElementById('word-input');
+    const searchWordBtn = document.getElementById('search-word-btn');
+    const wordExpansionResults = document.getElementById('word-expansion-results');
+    const step23Container = document.getElementById('step-2-3-container');
+    const contextCreationArea = document.getElementById('context-creation-area');
+    const saveCardBtn = document.getElementById('save-card-btn');
+    const reviewCardsBtn = document.getElementById('review-cards-btn');
+    const reviewArea = document.getElementById('review-area');
+
+    // --- Event Listeners for Explorer ---
+    explorerBtn.addEventListener('click', () => {
+        showView('vocabulary-explorer-view');
+    });
+
+    searchWordBtn.addEventListener('click', () => {
+        const word = wordInput.value.trim();
+        if (word) {
+            fetchWordData(word);
+        }
+    });
+
+    wordInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            searchWordBtn.click();
+        }
+    });
+
+    saveCardBtn.addEventListener('click', () => {
+        const wordForms = contextCreationArea.querySelectorAll('.word-form-group');
+        let cards = JSON.parse(localStorage.getItem('explorerFlashcards')) || [];
+        
+        wordForms.forEach(form => {
+            const word = form.dataset.word;
+            const sentence = form.querySelector('input').value.trim();
+            const explanation = form.querySelector('textarea').value.trim();
+
+            if (sentence && explanation) {
+                if (!cards.some(card => card.word === word)) {
+                    cards.push({ word, sentence, explanation });
+                }
+            }
+        });
+
+        localStorage.setItem('explorerFlashcards', JSON.stringify(cards));
+        alert('¡Tarjeta(s) guardada(s) con éxito!');
+        step23Container.classList.add('d-none');
+    });
+
+    reviewCardsBtn.addEventListener('click', () => {
+        renderReviewCards();
+    });
+
+
+    // --- Functions for Explorer ---
+
+    async function fetchWordData(word) {
+        wordExpansionResults.innerHTML = '<div class="text-center">Cargando...</div>';
+        step23Container.classList.add('d-none');
+        contextCreationArea.innerHTML = '';
+        reviewArea.classList.add('d-none');
+
+        try {
+            const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            displayWordData(data);
+        } catch (error) {
+            console.error("Error fetching word data:", error);
+            wordExpansionResults.innerHTML = `<div class="alert alert-danger">No se pudo encontrar la palabra. Intenta con otra.</div>`;
+        }
+    }
+
+    async function displayWordData(data) {
+        wordExpansionResults.innerHTML = '';
+        const wordData = data[0];
+
+        if (!wordData) {
+            wordExpansionResults.innerHTML = `<div class="alert alert-danger">No se encontraron resultados.</div>`;
+            return;
+        }
+
+        const phoneticText = wordData.phonetics.find(p => p.text)?.text || '';
+        const audioElement = wordData.phonetics.find(p => p.audio)?.audio;
+
+        let html = `<h3>${wordData.word} <span class="phonetic">${phoneticText}</span>`;
+        if (audioElement) {
+            html += ` <button class="audio-btn" onclick="new Audio('${audioElement}').play()">🔊</button>`;
+        }
+        html += `</h3>`;
+
+        const wordsToLearn = new Set([wordData.word]);
+
+        wordData.meanings.forEach((meaning, meaningIndex) => {
+            html += `<div class="meaning-block">`;
+            html += `<h4>${meaning.partOfSpeech}</h4>`;
+            html += `<ul>`;
+            meaning.definitions.forEach((def, defIndex) => {
+                html += `<li>`;
+                html += `<span>${def.definition}</span>`;
+                html += ` <button class="translate-btn" onclick="translateExplorerText(this, '${def.definition}')">Traducir</button>`;
+                html += `<div class="translation-result"></div>`;
+
+                if (def.example) {
+                    html += `<div class="example"><em>Ej: "${def.example}"</em>`;
+                    html += ` <button class="translate-btn" onclick="translateExplorerText(this, '${def.example}')">Traducir</button>`;
+                    html += `<div class="translation-result"></div></div>`;
+                }
+                html += `</li>`;
+            });
+            html += `</ul>`;
+            html += `</div>`;
+        });
+
+        wordExpansionResults.innerHTML = html;
+        
+        generateContextPrompts(wordsToLearn);
+        step23Container.classList.remove('d-none');
+    }
+
+    function generateContextPrompts(wordsSet) {
+        contextCreationArea.innerHTML = '';
+        
+        wordsSet.forEach(word => {
+            const promptHtml = `
+            <div class="word-form-group" data-word="${word}">
+                <label>1. Crea una frase personal con "<strong>${word}</strong>":</label>
+                <input type="text" placeholder="Escribe tu frase aquí...">
+                <label>2. Explica "<strong>${word}</strong>" de forma sencilla:</label>
+                <textarea rows="2" placeholder="Imagina que se lo explicas a un niño..."></textarea>
+            </div>
+            `;
+            contextCreationArea.innerHTML += promptHtml;
+        });
+    }
+
+    window.translateExplorerText = async function(button, text) {
+        const targetDiv = button.nextElementSibling;
+        targetDiv.innerHTML = '<em>Traduciendo...</em>';
+        button.disabled = true;
+
+        try {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=es&dt=t&q=${encodeURIComponent(text)}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Translation API failed');
+            
+            const translationData = await response.json();
+            const translatedText = translationData[0].map(chunk => chunk[0]).join('');
+            targetDiv.innerHTML = `<strong class="text-success">${translatedText}</strong>`;
+        } catch (error) {
+            console.error('Translation error:', error);
+            targetDiv.innerHTML = '<em class="text-danger">Falló la traducción.</em>';
+            button.disabled = false;
+        }
+    }
+
+    function renderReviewCards() {
+        const cards = JSON.parse(localStorage.getItem('explorerFlashcards')) || [];
+        reviewArea.classList.add('d-none');
+        reviewArea.innerHTML = '<h3>Mis Tarjetas Guardadas</h3>';
+
+        if (cards.length === 0) {
+            reviewArea.innerHTML += '<p>Aún no has guardado ninguna tarjeta.</p>';
+            return;
+        }
+
+        const cardGrid = document.createElement('div');
+        cardGrid.className = 'review-grid';
+
+        cards.forEach((card, index) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'review-card';
+            cardEl.innerHTML = `
+                <h4>${card.word}</h4>
+                <p><strong>Tu frase:</strong> ${card.sentence}</p>
+                <p><strong>Tu explicación:</strong> ${card.explanation}</p>
+                <button onclick="removeExplorerCard(${index})">Eliminar</button>
+            `;
+            cardGrid.appendChild(cardEl);
+        });
+
+        reviewArea.appendChild(cardGrid);
+    }
+
+    window.removeExplorerCard = (index) => {
+        let cards = JSON.parse(localStorage.getItem('explorerFlashcards')) || [];
+        cards.splice(index, 1);
+        localStorage.setItem('explorerFlashcards', JSON.stringify(cards));
+        renderReviewCards();
+    }
+
+    // --- END: VOCABULARY EXPLORER ADDITION ---
+
 });
