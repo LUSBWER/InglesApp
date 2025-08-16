@@ -526,4 +526,10 @@ body.dark-theme {
         align-items: flex-start;
         gap: 5px;
     }
+
+    #module-content .actions {
+        flex-direction: column;
+        align-items: stretch; /* Hace que los botones ocupen el ancho */
+        gap: 15px;
+    }
 }
